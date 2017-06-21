@@ -109,7 +109,7 @@ public class MemeDaoImpl implements MemeDao {
         for (Meme meme : memes) {
             final StoredMeme storedMeme = new StoredMeme();
 
-            storedMeme.setUri(meme.getUri().toString());
+            storedMeme.setUri(meme.getUri().getPath());
 
             final List<Integer> tagIds = new ArrayList<>();
 
