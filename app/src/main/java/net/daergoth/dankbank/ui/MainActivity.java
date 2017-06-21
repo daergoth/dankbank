@@ -3,6 +3,7 @@ package net.daergoth.dankbank.ui;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,12 +19,16 @@ import net.daergoth.dankbank.DankBankApplication;
 import net.daergoth.dankbank.R;
 import net.daergoth.dankbank.di.DaggerDankBankComponent;
 import net.daergoth.dankbank.di.DankBankComponent;
+import net.daergoth.dankbank.meme.MemeDao;
 import net.daergoth.dankbank.tag.TagDao;
 
 import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    @Inject
+    MemeDao memeDao;
 
     @Inject
     TagDao tagDao;

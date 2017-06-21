@@ -11,7 +11,6 @@ import net.daergoth.dankbank.tag.Tag;
 import net.daergoth.dankbank.tag.TagDao;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -78,6 +77,8 @@ public class MemeDaoImpl implements MemeDao {
             final JsonWriter jsonWriter = new JsonWriter(new FileWriter(saveFile));
 
             gson.toJson(storedMemes, StoredMemes.class, jsonWriter);
+
+            jsonWriter.close();
         } catch (IOException e) {
             Log.e(MemeDaoImpl.class.getName(), e.getMessage());
         }
@@ -94,7 +95,7 @@ public class MemeDaoImpl implements MemeDao {
             final StoredMemes storedMemes = gson.fromJson(jsonReader, StoredMemes.class);
 
             return convertFromStoredMemes(storedMemes);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             // this branch should not be reached at all
 
             return new ArrayList<>();
@@ -146,6 +147,8 @@ public class MemeDaoImpl implements MemeDao {
             }
 
             meme.setTags(tags);
+
+            result.add(meme);
         }
 
         return result;
