@@ -14,13 +14,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import net.daergoth.dankbank.R;
+import net.daergoth.dankbank.di.DaggerDankBankComponent;
+import net.daergoth.dankbank.tag.TagDao;
+
+import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    @Inject
+    TagDao tagDao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        DaggerDankBankComponent.builder().build().inject(this);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
