@@ -1,4 +1,4 @@
-package net.daergoth.dankbank.image;
+package net.daergoth.dankbank.meme;
 
 import android.net.Uri;
 

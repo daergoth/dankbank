@@ -2,11 +2,16 @@ package net.daergoth.dankbank.di;
 
 import android.content.Context;
 
-import net.daergoth.dankbank.image.MemeDao;
-import net.daergoth.dankbank.image.MemeDaoImpl;
+import com.google.gson.Gson;
+
+import net.daergoth.dankbank.meme.MemeDao;
+import net.daergoth.dankbank.meme.MemeDaoImpl;
 import net.daergoth.dankbank.tag.TagDao;
 import net.daergoth.dankbank.tag.TagDaoImpl;
 
+import java.io.File;
+
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -20,22 +25,34 @@ public class DankBankModule {
         this.context = context;
     }
 
-
     @Provides
     @Singleton
-    public TagDao providesTagDao() {
-        return new TagDaoImpl();
+    @Named("Internal Directory")
+    public File getInternalDirectory(Context context) {
+        return context.getFilesDir();
     }
 
     @Provides
     @Singleton
-    public MemeDao providesMemeDao(TagDao tagDao) {
-        return new MemeDaoImpl(tagDao);
+    public TagDao providesTagDao(@Named("Internal Directory") File saveDirectory) {
+        return new TagDaoImpl(saveDirectory);
+    }
+
+    @Provides
+    @Singleton
+    public MemeDao providesMemeDao(TagDao tagDao, @Named("Internal Directory") File saveDirectory) {
+        return new MemeDaoImpl(tagDao, saveDirectory);
     }
 
     @Provides
     @Singleton
     public Context providesContext() {
         return context;
+    }
+
+    @Provides
+    @Singleton
+    public Gson providesGson() {
+        return new Gson();
     }
 }

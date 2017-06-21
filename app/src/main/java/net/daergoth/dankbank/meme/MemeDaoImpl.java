@@ -1,8 +1,9 @@
-package net.daergoth.dankbank.image;
+package net.daergoth.dankbank.meme;
 
 import net.daergoth.dankbank.tag.Tag;
 import net.daergoth.dankbank.tag.TagDao;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,10 +12,14 @@ public class MemeDaoImpl implements MemeDao {
 
     private final TagDao tagDao;
 
+    private final File saveDirectory;
+
     private List<Meme> cachedMemes;
 
-    public MemeDaoImpl(TagDao tagDao) {
+    public MemeDaoImpl(TagDao tagDao, File saveDirectory) {
         this.tagDao = tagDao;
+
+        this.saveDirectory = saveDirectory;
 
         this.cachedMemes = new ArrayList<>();
     }
