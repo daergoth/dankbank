@@ -118,6 +118,8 @@ public class MemeDaoImpl implements MemeDao {
             }
 
             storedMeme.setTagIds(tagIds);
+
+            storedMemeList.add(storedMeme);
         }
 
         storedMemes.setMemes(storedMemeList);
