@@ -34,14 +34,14 @@ public class DankBankModule {
 
     @Provides
     @Singleton
-    public TagDao providesTagDao(@Named("Internal Directory") File saveDirectory) {
-        return new TagDaoImpl(saveDirectory);
+    public TagDao providesTagDao(@Named("Internal Directory") File saveDirectory, Gson gson) {
+        return new TagDaoImpl(saveDirectory, gson);
     }
 
     @Provides
     @Singleton
-    public MemeDao providesMemeDao(TagDao tagDao, @Named("Internal Directory") File saveDirectory) {
-        return new MemeDaoImpl(tagDao, saveDirectory);
+    public MemeDao providesMemeDao(TagDao tagDao, @Named("Internal Directory") File saveDirectory, Gson gson) {
+        return new MemeDaoImpl(tagDao, saveDirectory, gson);
     }
 
     @Provides

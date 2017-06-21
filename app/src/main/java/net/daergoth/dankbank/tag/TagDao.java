@@ -1,11 +1,11 @@
 package net.daergoth.dankbank.tag;
 
-
-import java.util.List;
+import java.util.Collection;
 
 public interface TagDao {
-
-    List<Tag> getAllTags();
+    Collection<Tag> getAllTags();
 
     void addTag(Tag t);
+
+    Tag getTagById(int id);
 }
