@@ -1,4 +1,4 @@
-package net.daergoth.dankbank;
+package net.daergoth.dankbank.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
+
+import net.daergoth.dankbank.R;
+
+import org.json.JSONObject;
 
 /**
  * @author Attila Bagossy
@@ -32,6 +36,8 @@ public class ShareActivity extends AppCompatActivity {
                 handleImage(intent);
             }
         }
+
+
      }
 
     private void handleImage(Intent intent) {
