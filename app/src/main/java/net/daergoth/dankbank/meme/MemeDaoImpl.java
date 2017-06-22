@@ -58,11 +58,24 @@ public class MemeDaoImpl implements MemeDao {
     }
 
     @Override
+    public void deleteMeme(Meme m) {
+        if (m == null) {
+            throw new NullPointerException("Meme cannot be null!");
+        }
+
+        if (cachedMemes.contains(m)) {
+            cachedMemes.remove(m);
+
+            saveChanges();
+        }
+    }
+
+    @Override
     public List<Meme> getMemesByTag(final Tag t) {
         final List<Meme> memesWithGivenTag = new ArrayList<>();
 
         for (Meme m : cachedMemes) {
-            if(m.getTags().contains(t)) {
+            if (m.getTags().contains(t)) {
                 memesWithGivenTag.add(m);
             }
         }

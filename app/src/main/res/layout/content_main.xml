@@ -12,6 +12,7 @@
         android:id="@+id/mainRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        app:layoutManager="LinearLayoutManager" />
 
 </LinearLayout>

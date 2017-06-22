@@ -10,6 +10,8 @@ public interface MemeDao {
 
     void addMeme(Meme m);
 
+    void deleteMeme(Meme m);
+
     List<Meme> getMemesByTag(Tag t);
 
 }

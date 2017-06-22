@@ -1,18 +1,20 @@
 package net.daergoth.dankbank.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
 import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
@@ -65,14 +67,46 @@ public class MainActivity extends AppCompatActivity
 
 
         // RecyclerView setup
-        Log.d(MainActivity.class.getName(), memeDao.getAllMemes().get(0).toString());
         mainRecyclerView = (RecyclerView) findViewById(R.id.mainRecyclerView);
+        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        mainRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mainRecyclerView, new ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                //Open meme on bigger window
+                Intent bigMemeIntent = new Intent(MainActivity.this, MemeActivity.class);
+                bigMemeIntent.putExtra("memeUri", memeDao.getAllMemes().get(position).getUri());
+                startActivity(bigMemeIntent);
+            }
 
-        RecyclerView.LayoutManager recyclerViewLayoutManager = new LinearLayoutManager(this);
-        mainRecyclerView.setLayoutManager(recyclerViewLayoutManager);
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
+
+//        RecyclerView.LayoutManager recyclerViewLayoutManager = new LinearLayoutManager(this);
+//        mainRecyclerView.setLayoutManager(recyclerViewLayoutManager);
 
         recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
         mainRecyclerView.setAdapter(recyclerViewAdapter);
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.DOWN | ItemTouchHelper.UP) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                Toast.makeText(MainActivity.this, "on Move", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                memeDao.deleteMeme(memeDao.getAllMemes().get(viewHolder.getAdapterPosition()));
+                recyclerViewAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(mainRecyclerView);
     }
 
     @Override
@@ -125,6 +159,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public interface ClickListener {
+        void onClick(View view, int position);
+
+        void onLongClick(View view, int position);
     }
 
 }
