@@ -13,6 +13,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
 import net.daergoth.dankbank.R;
@@ -37,7 +38,7 @@ import javax.inject.Inject;
 public class ShareActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String ALBUM_NAME = "DankMemes";
 
-    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 24231;
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 24231;
 
     @Inject
     MemeDao memeDao;
@@ -64,6 +65,21 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
             imageShow.setImageURI(imageUri);
 
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Can't save meme without permission", Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+            }
+
             saveImage(imageUri, getFileExtension(intent));
         }
     }
@@ -71,22 +87,6 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
     private void saveImage(Uri imageUri, String extension) {
         if (!isExternalStorageWritable()) {
             return;
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-
-            // No explanation needed, we can request the permission.
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
         }
 
         try {

@@ -1,9 +1,14 @@
 package net.daergoth.dankbank.ui.main;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -29,7 +34,9 @@ import net.daergoth.dankbank.ui.meme.MemeActivity;
 import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback {
+
+    private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 124;
 
     @Inject
     TagDao tagDao;
@@ -66,6 +73,13 @@ public class MainActivity extends AppCompatActivity
         tagSubMenu.add(Menu.NONE, -1, Menu.NONE, "All");
         for (Tag t : tagDao.getAllTags()) {
             tagSubMenu.add(Menu.NONE, t.getId(), Menu.NONE, t.getTagName());
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
         }
 
 
@@ -189,4 +203,27 @@ public class MainActivity extends AppCompatActivity
         void onLongClick(View view, int position);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_READ_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 }
