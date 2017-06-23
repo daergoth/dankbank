@@ -12,6 +12,8 @@ import android.widget.ImageView;
 
 import net.daergoth.dankbank.R;
 
+import java.io.File;
+
 public class MemeActivity extends AppCompatActivity {
 
     private ImageView bigMemeDisplayImageView;
@@ -54,7 +56,7 @@ public class MemeActivity extends AppCompatActivity {
                 ShareCompat.IntentBuilder
                         .from(this)
                         .setChooserTitle("Share your meme")
-                        .setStream(memeUri)
+                        .setStream(Uri.fromFile(new File(memeUri.getPath())))
                         .setType(mimeType)
                         .startChooser();
                 break;

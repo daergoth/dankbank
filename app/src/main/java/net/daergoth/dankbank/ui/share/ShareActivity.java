@@ -1,11 +1,15 @@
 package net.daergoth.dankbank.ui.share;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
@@ -30,8 +34,10 @@ import javax.inject.Inject;
  * @author Attila Bagossy
  * @author Petya Lakatos
  */
-public class ShareActivity extends AppCompatActivity {
-    private static final String ALBUM_NAME = "Dank Memes";
+public class ShareActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+    private static final String ALBUM_NAME = "DankMemes";
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 24231;
 
     @Inject
     MemeDao memeDao;
@@ -52,16 +58,35 @@ public class ShareActivity extends AppCompatActivity {
 
         final Uri imageUri = getImageUri(intent);
 
+
         if (imageUri != null) {
+            Log.d(ShareActivity.class.getName(), "Shared image URI: " + imageUri.toString());
+
             imageShow.setImageURI(imageUri);
 
             saveImage(imageUri, getFileExtension(intent));
         }
-     }
+    }
 
     private void saveImage(Uri imageUri, String extension) {
         if (!isExternalStorageWritable()) {
             return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
         }
 
         try {
@@ -131,10 +156,12 @@ public class ShareActivity extends AppCompatActivity {
     }
 
     public File getAlbumStorageDir(Context context) {
-        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), ALBUM_NAME);
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), ALBUM_NAME);
 
         if (!file.mkdirs()) {
-            Log.i(ShareActivity.class.getName(), "Directory not created");
+            Log.e(ShareActivity.class.getName(), "Directory not created");
+
+            Log.d(ShareActivity.class.getName(), String.valueOf(file.exists()));
         }
 
         return file;
