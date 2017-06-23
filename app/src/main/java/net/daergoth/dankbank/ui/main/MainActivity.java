@@ -1,8 +1,9 @@
-package net.daergoth.dankbank.ui;
+package net.daergoth.dankbank.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,9 +20,11 @@ import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
 import net.daergoth.dankbank.R;
+import net.daergoth.dankbank.meme.Meme;
 import net.daergoth.dankbank.meme.MemeDao;
 import net.daergoth.dankbank.tag.Tag;
 import net.daergoth.dankbank.tag.TagDao;
+import net.daergoth.dankbank.ui.meme.MemeActivity;
 
 import javax.inject.Inject;
 
@@ -84,29 +87,48 @@ public class MainActivity extends AppCompatActivity
             }
         }));
 
-//        RecyclerView.LayoutManager recyclerViewLayoutManager = new LinearLayoutManager(this);
-//        mainRecyclerView.setLayoutManager(recyclerViewLayoutManager);
-
         recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
         mainRecyclerView.setAdapter(recyclerViewAdapter);
 
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.DOWN | ItemTouchHelper.UP) {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                Toast.makeText(MainActivity.this, "on Move", Toast.LENGTH_SHORT).show();
                 return false;
             }
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                memeDao.deleteMeme(memeDao.getAllMemes().get(viewHolder.getAdapterPosition()));
+                final Meme toBeDeleted = memeDao.getAllMemes().get(viewHolder.getAdapterPosition());
+
+                memeDao.deleteMeme(toBeDeleted);
                 recyclerViewAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+
+                Snackbar undoSnackbar = Snackbar.make(findViewById(R.id.main_coordinator_layout),
+                        "Meme deleted", Snackbar.LENGTH_LONG);
+                undoSnackbar.setAction("Undo", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        memeDao.addMeme(toBeDeleted);
+                        recyclerViewAdapter.notifyDataSetChanged();
+                    }
+                });
+                undoSnackbar.show();
             }
         };
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mainRecyclerView);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
+        mainRecyclerView.setAdapter(recyclerViewAdapter);
+        mainRecyclerView.invalidate();
+
     }
 
     @Override

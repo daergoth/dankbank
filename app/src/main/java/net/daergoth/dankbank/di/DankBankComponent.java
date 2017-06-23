@@ -1,7 +1,7 @@
 package net.daergoth.dankbank.di;
 
-import net.daergoth.dankbank.ui.MainActivity;
-import net.daergoth.dankbank.ui.ShareActivity;
+import net.daergoth.dankbank.ui.main.MainActivity;
+import net.daergoth.dankbank.ui.share.ShareActivity;
 
 import javax.inject.Singleton;
 

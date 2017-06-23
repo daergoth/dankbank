@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.daergoth.dankbank.ui.MemeActivity">
+    tools:context="net.daergoth.dankbank.ui.meme.MemeActivity">
 
     <ImageView
         android:id="@+id/big_meme_display"

@@ -1,10 +1,12 @@
-package net.daergoth.dankbank.ui;
+package net.daergoth.dankbank.ui.main;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+
+import net.daergoth.dankbank.ui.main.MainActivity;
 
 public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 

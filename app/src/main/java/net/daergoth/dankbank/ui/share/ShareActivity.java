@@ -1,4 +1,4 @@
-package net.daergoth.dankbank.ui;
+package net.daergoth.dankbank.ui.share;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,17 +12,12 @@ import android.widget.ImageView;
 
 import net.daergoth.dankbank.DankBankApplication;
 import net.daergoth.dankbank.R;
-import net.daergoth.dankbank.di.DankBankComponent;
 import net.daergoth.dankbank.meme.Meme;
 import net.daergoth.dankbank.meme.MemeDao;
 import net.daergoth.dankbank.tag.Tag;
 
-import org.json.JSONObject;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,8 +25,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.inject.Inject;
-
-import static android.R.attr.type;
 
 /**
  * @author Attila Bagossy

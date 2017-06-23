@@ -1,11 +1,11 @@
-package net.daergoth.dankbank.ui;
+package net.daergoth.dankbank.ui.main;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import net.daergoth.dankbank.R;
@@ -53,7 +53,7 @@ public class MemeAdapter extends RecyclerView.Adapter<MemeAdapter.ViewHolder> {
 
         private ImageView memeImageView;
 
-        private LinearLayout tagLinearLayout;
+        private ScrollView tagLinearLayout;
 
         public ViewHolder(View holder) {
             super(holder);
