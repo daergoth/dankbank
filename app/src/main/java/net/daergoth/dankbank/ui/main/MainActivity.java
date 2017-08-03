@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -14,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -30,13 +32,19 @@ import net.daergoth.dankbank.meme.MemeDao;
 import net.daergoth.dankbank.tag.Tag;
 import net.daergoth.dankbank.tag.TagDao;
 import net.daergoth.dankbank.ui.meme.MemeActivity;
+import net.daergoth.dankbank.ui.util.ClickListener;
+import net.daergoth.dankbank.ui.util.RecyclerTouchListener;
 
 import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 124;
+    public static final String STATE_SELECTED_TAG_ID = "selectedTagId";
 
     @Inject
     TagDao tagDao;
@@ -44,9 +52,21 @@ public class MainActivity extends AppCompatActivity
     @Inject
     MemeDao memeDao;
 
-    private RecyclerView.Adapter recyclerViewAdapter;
+    @BindView(R.id.mainRecyclerView)
+    RecyclerView mainRecyclerView;
 
-    private RecyclerView mainRecyclerView;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
+    private MemeAdapter recyclerViewAdapter;
+
+    private Integer selectedTagId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,24 +76,20 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        ButterKnife.bind(this);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (savedInstanceState != null && !savedInstanceState.isEmpty()) {
+            selectedTagId = savedInstanceState.getInt(STATE_SELECTED_TAG_ID);
+        } else {
+            selectedTagId = -1;
+        }
+
+        setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        Menu navMenu = navigationView.getMenu();
-
-        SubMenu tagSubMenu = navMenu.addSubMenu("Tags");
-        tagSubMenu.add(Menu.NONE, -1, Menu.NONE, "All");
-        for (Tag t : tagDao.getAllTags()) {
-            tagSubMenu.add(Menu.NONE, t.getId(), Menu.NONE, t.getTagName());
-        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -84,14 +100,15 @@ public class MainActivity extends AppCompatActivity
 
 
         // RecyclerView setup
-        mainRecyclerView = (RecyclerView) findViewById(R.id.mainRecyclerView);
-        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        //mainRecyclerView.setLayoutManager(new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false));
+        mainRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
         mainRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mainRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 //Open meme on bigger window
                 Intent bigMemeIntent = new Intent(MainActivity.this, MemeActivity.class);
-                bigMemeIntent.putExtra("memeUri", memeDao.getAllMemes().get(position).getUri());
+                bigMemeIntent.putExtra("memeUri", recyclerViewAdapter.getMemeList().get(position).getUri());
                 startActivity(bigMemeIntent);
             }
 
@@ -139,10 +156,24 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
+        if (selectedTagId != -1) {
+            Tag t = tagDao.getTagById(selectedTagId);
+            recyclerViewAdapter = new MemeAdapter(memeDao.getMemesByTag(t));
+        } else {
+            recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
+        }
         mainRecyclerView.setAdapter(recyclerViewAdapter);
         mainRecyclerView.invalidate();
 
+        navigationView.setNavigationItemSelectedListener(this);
+        Menu navMenu = navigationView.getMenu();
+        navMenu.clear();
+
+        SubMenu tagSubMenu = navMenu.addSubMenu("Tags");
+        tagSubMenu.add(Menu.NONE, -1, Menu.NONE, "All");
+        for (Tag t : tagDao.getAllTags()) {
+            tagSubMenu.add(Menu.NONE, t.getId(), Menu.NONE, t.getTagName());
+        }
     }
 
     @Override
@@ -157,7 +188,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -165,12 +195,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -178,18 +204,20 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        if (item.getItemId() == -1) {
+        selectedTagId = item.getItemId();
+
+        if (selectedTagId == -1) {
             recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
             Toast.makeText(this, "All tags", Toast.LENGTH_SHORT).show();
         } else {
-            Tag t = tagDao.getTagById(item.getItemId());
+            Tag t = tagDao.getTagById(selectedTagId);
             recyclerViewAdapter = new MemeAdapter(memeDao.getMemesByTag(t));
             Toast.makeText(this, t.getTagName() + " tag", Toast.LENGTH_SHORT).show();
         }
 
+        mainRecyclerView.setAdapter(recyclerViewAdapter);
         mainRecyclerView.invalidate();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -197,22 +225,12 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public interface ClickListener {
-        void onClick(View view, int position);
-
-        void onLongClick(View view, int position);
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_REQUEST_READ_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
 
                 } else {
                     ActivityCompat.requestPermissions(this,
@@ -222,8 +240,13 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
 
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        outState.putInt(STATE_SELECTED_TAG_ID, selectedTagId);
+
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 }

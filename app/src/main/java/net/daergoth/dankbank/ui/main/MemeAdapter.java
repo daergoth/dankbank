@@ -5,14 +5,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import net.daergoth.dankbank.R;
 import net.daergoth.dankbank.meme.Meme;
-import net.daergoth.dankbank.tag.Tag;
 
+import java.util.Collections;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MemeAdapter extends RecyclerView.Adapter<MemeAdapter.ViewHolder> {
 
@@ -27,6 +28,7 @@ public class MemeAdapter extends RecyclerView.Adapter<MemeAdapter.ViewHolder> {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.meme_list_row, parent, false);
 
+
         return new ViewHolder(v);
     }
 
@@ -35,13 +37,6 @@ public class MemeAdapter extends RecyclerView.Adapter<MemeAdapter.ViewHolder> {
         Meme m = memeList.get(position);
 
         holder.memeImageView.setImageURI(m.getUri());
-
-        holder.tagLinearLayout.removeAllViews();
-        for (Tag t : m.getTags()) {
-            TextView tagView = new TextView(holder.tagLinearLayout.getContext());
-            tagView.setText(t.getTagName());
-            holder.tagLinearLayout.addView(tagView);
-        }
     }
 
     @Override
@@ -49,17 +44,19 @@ public class MemeAdapter extends RecyclerView.Adapter<MemeAdapter.ViewHolder> {
         return memeList.size();
     }
 
+    public List<Meme> getMemeList() {
+        return Collections.unmodifiableList(memeList);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView memeImageView;
-
-        private ScrollView tagLinearLayout;
+        @BindView(R.id.meme_item_image)
+        ImageView memeImageView;
 
         public ViewHolder(View holder) {
             super(holder);
 
-            this.memeImageView = holder.findViewById(R.id.meme_row_image);
-            this.tagLinearLayout = holder.findViewById(R.id.meme_row_tagLayout);
+            ButterKnife.bind(this, holder);
         }
 
     }

@@ -8,11 +8,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
@@ -20,6 +25,7 @@ import net.daergoth.dankbank.R;
 import net.daergoth.dankbank.meme.Meme;
 import net.daergoth.dankbank.meme.MemeDao;
 import net.daergoth.dankbank.tag.Tag;
+import net.daergoth.dankbank.tag.TagDao;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,9 +33,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * @author Attila Bagossy
@@ -43,7 +54,26 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
     @Inject
     MemeDao memeDao;
 
-    private ImageView imageShow;
+    @Inject
+    TagDao tagDao;
+
+    @BindView(R.id.memeImage)
+    ImageView imageShow;
+
+    @BindView(R.id.autoTextViewTag)
+    AutoCompleteTextView tagAutoTextView;
+
+    @BindView(R.id.listViewAddedTags)
+    ListView tagsListView;
+
+    @BindView(R.id.saveMemeFloatingActionButton)
+    FloatingActionButton saveMemeButton;
+
+    private Uri imageUri;
+
+    private List<String> tagItemList;
+
+    private ListAdapter listAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,35 +83,64 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
         setContentView(R.layout.share_layout);
 
-        imageShow = (ImageView) findViewById(R.id.imageShow);
+        ButterKnife.bind(this);
 
-        final Intent intent = getIntent();
+        imageUri = getImageUri(getIntent());
 
-        final Uri imageUri = getImageUri(intent);
+        tagItemList = new ArrayList<>();
 
+        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        tagsListView.setAdapter(listAdapter);
+
+        List<String> tagNames = new ArrayList<>();
+        for (Tag t : tagDao.getAllTags()) {
+            tagNames.add(t.getTagName());
+        }
+        tagAutoTextView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, tagNames));
 
         if (imageUri != null) {
             Log.d(ShareActivity.class.getName(), "Shared image URI: " + imageUri.toString());
 
             imageShow.setImageURI(imageUri);
+        } else {
+            saveMemeButton.setEnabled(false);
+        }
+    }
+
+    @OnClick(R.id.buttonAddTag)
+    void addTagOnClick() {
+        String tagName = tagAutoTextView.getText().toString();
+        final int numTags = tagItemList.size();
+
+        TagListItem tagListItem = new TagListItem(tagsListView, tagName);
+        tagItemList.add(tagName);
+
+        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tagItemList);
+        tagsListView.setAdapter(listAdapter);
+
+        tagAutoTextView.setText("");
+        tagAutoTextView.clearFocus();
+    }
+
+    @OnClick(R.id.saveMemeFloatingActionButton)
+    void saveMemeOnClick() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Can't save meme without permission", Toast.LENGTH_SHORT).show();
 
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Can't save meme without permission", Toast.LENGTH_SHORT).show();
-
-                    return;
-                }
+                return;
             }
-
-            saveImage(imageUri, getFileExtension(intent));
         }
+
+        saveImage(imageUri, getFileExtension(getIntent()));
+        finish();
     }
 
     private void saveImage(Uri imageUri, String extension) {
@@ -109,7 +168,19 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
             final Meme meme = new Meme();
 
-            meme.setTags(new ArrayList<Tag>());
+            List<Tag> attachedTagList = new ArrayList<>();
+            for (String tagName : tagItemList) {
+                Tag tag = tagDao.getTagByName(tagName);
+
+                if (tag == null) {
+                    tag = new Tag();
+                    tag.setTagName(tagName);
+                    tagDao.addTag(tag);
+                }
+
+                attachedTagList.add(tag);
+            }
+            meme.setTags(attachedTagList);
 
             meme.setUri(Uri.parse(outputFile.getPath()));
 
@@ -155,7 +226,7 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    public File getAlbumStorageDir(Context context) {
+    private File getAlbumStorageDir(Context context) {
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), ALBUM_NAME);
 
         if (!file.mkdirs()) {

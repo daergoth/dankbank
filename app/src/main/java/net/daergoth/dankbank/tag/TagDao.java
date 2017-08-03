@@ -8,4 +8,6 @@ public interface TagDao {
     void addTag(Tag t);
 
     Tag getTagById(int id);
+
+    Tag getTagByName(String name);
 }

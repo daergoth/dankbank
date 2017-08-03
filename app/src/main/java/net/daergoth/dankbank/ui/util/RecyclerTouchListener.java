@@ -1,4 +1,4 @@
-package net.daergoth.dankbank.ui.main;
+package net.daergoth.dankbank.ui.util;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,14 +6,14 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.daergoth.dankbank.ui.main.MainActivity;
+import net.daergoth.dankbank.ui.util.ClickListener;
 
 public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
     private GestureDetector gestureDetector;
-    private MainActivity.ClickListener clickListener;
+    private ClickListener clickListener;
 
-    public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final MainActivity.ClickListener clickListener) {
+    public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener) {
         this.clickListener = clickListener;
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override

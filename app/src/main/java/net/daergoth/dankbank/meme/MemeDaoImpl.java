@@ -45,6 +45,17 @@ public class MemeDaoImpl implements MemeDao {
     }
 
     @Override
+    public Meme getMemeByUri(Uri uri) {
+        for (Meme m : cachedMemes) {
+            if (m.getUri().equals(uri)) {
+                return m;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public void addMeme(Meme m) {
         if (m == null) {
             throw new NullPointerException("Meme cannot be null!");

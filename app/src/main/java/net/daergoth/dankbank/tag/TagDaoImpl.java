@@ -6,8 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import net.daergoth.dankbank.meme.MemeDaoImpl;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -49,7 +47,11 @@ public class TagDaoImpl implements TagDao {
         }
 
         if (!cachedTags.containsValue(t)) {
-            cachedTags.put(0, t);
+            if (t.getId() == null) {
+                t.setId(cachedTags.size());
+            }
+
+            cachedTags.put(t.getId(), t);
 
             saveChanges();
         }
@@ -58,6 +60,17 @@ public class TagDaoImpl implements TagDao {
     @Override
     public Tag getTagById(int id) {
         return cachedTags.get(id);
+    }
+
+    @Override
+    public Tag getTagByName(String name) {
+        for (Tag t : cachedTags.values()) {
+            if (t.getTagName().equals(name)) {
+                return t;
+            }
+        }
+
+        return null;
     }
 
     private void saveChanges() {
@@ -69,6 +82,9 @@ public class TagDaoImpl implements TagDao {
             final JsonWriter jsonWriter = new JsonWriter(new FileWriter(saveFile));
 
             gson.toJson(storedTags, StoredTags.class, jsonWriter);
+
+            jsonWriter.close();
+
         } catch (IOException e) {
             Log.e(TagDaoImpl.class.getName(), e.getMessage());
         }
