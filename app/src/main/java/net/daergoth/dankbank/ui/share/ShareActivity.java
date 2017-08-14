@@ -13,11 +13,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
@@ -88,9 +90,7 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
         imageUri = getImageUri(getIntent());
 
         tagItemList = new ArrayList<>();
-
-        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-        tagsListView.setAdapter(listAdapter);
+        updateAddedTagsList();
 
         List<String> tagNames = new ArrayList<>();
         for (Tag t : tagDao.getAllTags()) {
@@ -110,16 +110,21 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
     @OnClick(R.id.buttonAddTag)
     void addTagOnClick() {
         String tagName = tagAutoTextView.getText().toString();
-        final int numTags = tagItemList.size();
 
-        TagListItem tagListItem = new TagListItem(tagsListView, tagName);
         tagItemList.add(tagName);
 
-        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tagItemList);
-        tagsListView.setAdapter(listAdapter);
+        updateAddedTagsList();
 
         tagAutoTextView.setText("");
         tagAutoTextView.clearFocus();
+    }
+
+    void removeTagOnClick(View v) {
+        TextView tagNameTextView = ButterKnife.findById(v.getRootView(), R.id.textViewTagItemName);
+
+        tagItemList.remove(tagNameTextView.getText().toString());
+
+        updateAddedTagsList();
     }
 
     @OnClick(R.id.saveMemeFloatingActionButton)
@@ -141,6 +146,11 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
         saveImage(imageUri, getFileExtension(getIntent()));
         finish();
+    }
+
+    private void updateAddedTagsList() {
+        listAdapter = new ArrayAdapter<>(this, R.layout.share_tag_list_item, R.id.textViewTagItemName, tagItemList);
+        tagsListView.setAdapter(listAdapter);
     }
 
     private void saveImage(Uri imageUri, String extension) {

@@ -100,9 +100,8 @@ public class MainActivity extends AppCompatActivity
 
 
         // RecyclerView setup
-        //mainRecyclerView.setLayoutManager(new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false));
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
+        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mainRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mainRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
