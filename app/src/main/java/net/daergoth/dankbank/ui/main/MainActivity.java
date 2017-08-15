@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity
                 undoSnackbar.setAction("Undo", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        memeDao.addMeme(toBeDeleted);
+                        memeDao.saveMeme(toBeDeleted);
                         recyclerViewAdapter.notifyDataSetChanged();
                     }
                 });

@@ -22,20 +22,20 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
+
+
+
+
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:support-v4:26.+'
     compile 'com.android.support:design:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-
-    testCompile 'junit:junit:4.12'
-    
     compile 'com.google.code.gson:gson:2.8.1'
-
     compile 'com.google.dagger:dagger:2.11'
     compile 'com.google.dagger:dagger-android-support:2.11'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
-
     compile 'com.jakewharton:butterknife:8.7.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
     compile 'com.google.android.gms:play-services-ads:11.0.4'
+    testCompile 'junit:junit:4.12'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
 }

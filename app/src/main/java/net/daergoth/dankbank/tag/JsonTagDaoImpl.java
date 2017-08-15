@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TagDaoImpl implements TagDao {
+public class JsonTagDaoImpl implements TagDao {
     private static final String FILENAME = "tags.json";
 
     private final File saveFile;
@@ -27,7 +27,7 @@ public class TagDaoImpl implements TagDao {
 
     private Map<Integer, Tag> cachedTags;
 
-    public TagDaoImpl(File saveDirectory, Gson gson) {
+    public JsonTagDaoImpl(File saveDirectory, Gson gson) {
         this.saveFile = new File(saveDirectory, FILENAME);
 
         this.gson = gson;
@@ -41,7 +41,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public void addTag(Tag t) {
+    public void saveMeme(Tag t) {
         if (t == null) {
             throw new NullPointerException("Tag cannot be null!");
         }
@@ -86,7 +86,7 @@ public class TagDaoImpl implements TagDao {
             jsonWriter.close();
 
         } catch (IOException e) {
-            Log.e(TagDaoImpl.class.getName(), e.getMessage());
+            Log.e(JsonTagDaoImpl.class.getName(), e.getMessage());
         }
     }
 

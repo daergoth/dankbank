@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -75,15 +77,13 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
     private List<String> tagItemList;
 
-    private ListAdapter listAdapter;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((DankBankApplication) getApplication()).getDankBankComponent().inject(this);
 
-        setContentView(R.layout.share_layout);
+        setContentView(R.layout.activity_share);
 
         ButterKnife.bind(this);
 
@@ -109,14 +109,18 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
     @OnClick(R.id.buttonAddTag)
     void addTagOnClick() {
-        String tagName = tagAutoTextView.getText().toString();
+        String newTagName = tagAutoTextView.getText().toString();
 
-        tagItemList.add(tagName);
+        if (!newTagName.isEmpty()) {
+            if (!tagItemList.contains(newTagName)) {
+                tagItemList.add(newTagName);
 
-        updateAddedTagsList();
+                updateAddedTagsList();
+            }
 
-        tagAutoTextView.setText("");
-        tagAutoTextView.clearFocus();
+            tagAutoTextView.setText("");
+            tagAutoTextView.clearFocus();
+        }
     }
 
     void removeTagOnClick(View v) {
@@ -149,7 +153,7 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
     }
 
     private void updateAddedTagsList() {
-        listAdapter = new ArrayAdapter<>(this, R.layout.share_tag_list_item, R.id.textViewTagItemName, tagItemList);
+        ListAdapter listAdapter = new ArrayAdapter<>(this, R.layout.tag_list_item, R.id.textViewTagItemName, tagItemList);
         tagsListView.setAdapter(listAdapter);
     }
 
@@ -178,14 +182,14 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
             final Meme meme = new Meme();
 
-            List<Tag> attachedTagList = new ArrayList<>();
+            Set<Tag> attachedTagList = new HashSet<>();
             for (String tagName : tagItemList) {
                 Tag tag = tagDao.getTagByName(tagName);
 
                 if (tag == null) {
                     tag = new Tag();
                     tag.setTagName(tagName);
-                    tagDao.addTag(tag);
+                    tagDao.saveMeme(tag);
                 }
 
                 attachedTagList.add(tag);
@@ -194,7 +198,7 @@ public class ShareActivity extends AppCompatActivity implements ActivityCompat.O
 
             meme.setUri(Uri.parse(outputFile.getPath()));
 
-            memeDao.addMeme(meme);
+            memeDao.saveMeme(meme);
 
             Log.i(ShareActivity.class.getName(), "Saved meme at " + outputFile.getPath());
         } catch (IOException e) {

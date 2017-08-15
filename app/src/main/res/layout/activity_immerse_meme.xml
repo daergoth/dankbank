@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context="net.daergoth.dankbank.ui.meme.ImmerseMemeActivity">
+
+    <ImageView
+        android:id="@+id/fullscreen_meme"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:keepScreenOn="true"
+        android:scaleType="fitCenter" />
+
+</FrameLayout>

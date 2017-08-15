@@ -5,18 +5,19 @@ import android.net.Uri;
 import net.daergoth.dankbank.tag.Tag;
 
 import java.util.List;
+import java.util.Set;
 
 public class Meme {
 
     private Uri uri;
 
-    private List<Tag> tags;
+    private Set<Tag> tags;
 
     public Uri getUri() {
         return uri;
     }
 
-    public List<Tag> getTags() {
+    public Set<Tag> getTags() {
         return tags;
     }
 
@@ -24,7 +25,7 @@ public class Meme {
         this.uri = uri;
     }
 
-    public void setTags(List<Tag> tags) {
+    public void setTags(Set<Tag> tags) {
         this.tags = tags;
     }
 

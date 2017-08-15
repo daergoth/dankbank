@@ -5,7 +5,7 @@ import java.util.Collection;
 public interface TagDao {
     Collection<Tag> getAllTags();
 
-    void addTag(Tag t);
+    void saveMeme(Tag t);
 
     Tag getTagById(int id);
 

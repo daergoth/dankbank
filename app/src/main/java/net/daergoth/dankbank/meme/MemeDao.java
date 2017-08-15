@@ -12,7 +12,7 @@ public interface MemeDao {
 
     Meme getMemeByUri(Uri uri);
 
-    void addMeme(Meme m);
+    void saveMeme(Meme m);
 
     void deleteMeme(Meme m);
 

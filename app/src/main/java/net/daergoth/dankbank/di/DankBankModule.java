@@ -5,9 +5,9 @@ import android.content.Context;
 import com.google.gson.Gson;
 
 import net.daergoth.dankbank.meme.MemeDao;
-import net.daergoth.dankbank.meme.MemeDaoImpl;
+import net.daergoth.dankbank.meme.JsonMemeDaoImpl;
 import net.daergoth.dankbank.tag.TagDao;
-import net.daergoth.dankbank.tag.TagDaoImpl;
+import net.daergoth.dankbank.tag.JsonTagDaoImpl;
 
 import java.io.File;
 
@@ -35,13 +35,13 @@ public class DankBankModule {
     @Provides
     @Singleton
     public TagDao providesTagDao(@Named("Internal Directory") File saveDirectory, Gson gson) {
-        return new TagDaoImpl(saveDirectory, gson);
+        return new JsonTagDaoImpl(saveDirectory, gson);
     }
 
     @Provides
     @Singleton
     public MemeDao providesMemeDao(TagDao tagDao, @Named("Internal Directory") File saveDirectory, Gson gson) {
-        return new MemeDaoImpl(tagDao, saveDirectory, gson);
+        return new JsonMemeDaoImpl(tagDao, saveDirectory, gson);
     }
 
     @Provides

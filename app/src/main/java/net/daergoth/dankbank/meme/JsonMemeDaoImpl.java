@@ -15,10 +15,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class MemeDaoImpl implements MemeDao {
+public class JsonMemeDaoImpl implements MemeDao {
     private static final String FILENAME = "memes.json";
 
     private final TagDao tagDao;
@@ -27,9 +31,9 @@ public class MemeDaoImpl implements MemeDao {
 
     private final Gson gson;
 
-    private List<Meme> cachedMemes;
+    private Map<String, Meme> cachedMemes;
 
-    public MemeDaoImpl(TagDao tagDao, File saveDirectory, Gson gson) {
+    public JsonMemeDaoImpl(TagDao tagDao, File saveDirectory, Gson gson) {
         this.tagDao = tagDao;
 
         this.saveFile = new File(saveDirectory, FILENAME);
@@ -41,31 +45,23 @@ public class MemeDaoImpl implements MemeDao {
 
     @Override
     public List<Meme> getAllMemes() {
-        return Collections.unmodifiableList(cachedMemes);
+        return new ArrayList<>(cachedMemes.values());
     }
 
     @Override
     public Meme getMemeByUri(Uri uri) {
-        for (Meme m : cachedMemes) {
-            if (m.getUri().equals(uri)) {
-                return m;
-            }
-        }
-
-        return null;
+        return cachedMemes.get(uri.toString());
     }
 
     @Override
-    public void addMeme(Meme m) {
+    public void saveMeme(Meme m) {
         if (m == null) {
             throw new NullPointerException("Meme cannot be null!");
         }
 
-        if (!cachedMemes.contains(m)) {
-            cachedMemes.add(m);
+        cachedMemes.put(m.getUri().toString(), m);
 
-            saveChanges();
-        }
+        saveChanges();
     }
 
     @Override
@@ -74,8 +70,10 @@ public class MemeDaoImpl implements MemeDao {
             throw new NullPointerException("Meme cannot be null!");
         }
 
-        if (cachedMemes.contains(m)) {
-            cachedMemes.remove(m);
+        String uniqueUriString = m.getUri().toString();
+
+        if (cachedMemes.containsKey(uniqueUriString)) {
+            cachedMemes.remove(uniqueUriString);
 
             saveChanges();
         }
@@ -85,7 +83,7 @@ public class MemeDaoImpl implements MemeDao {
     public List<Meme> getMemesByTag(final Tag t) {
         final List<Meme> memesWithGivenTag = new ArrayList<>();
 
-        for (Meme m : cachedMemes) {
+        for (Meme m : cachedMemes.values()) {
             if (m.getTags().contains(t)) {
                 memesWithGivenTag.add(m);
             }
@@ -95,7 +93,7 @@ public class MemeDaoImpl implements MemeDao {
     }
 
     private void saveChanges() {
-        final StoredMemes storedMemes = convertToStoredMemes(this.cachedMemes);
+        final StoredMemes storedMemes = convertToStoredMemes(this.cachedMemes.values());
 
         try {
             final JsonWriter jsonWriter = new JsonWriter(new FileWriter(saveFile));
@@ -104,13 +102,13 @@ public class MemeDaoImpl implements MemeDao {
 
             jsonWriter.close();
         } catch (IOException e) {
-            Log.e(MemeDaoImpl.class.getName(), e.getMessage());
+            Log.e(JsonMemeDaoImpl.class.getName(), e.getMessage());
         }
     }
 
-    private List<Meme> loadMemes() {
+    private Map<String, Meme> loadMemes() {
         if (!saveFile.exists()) {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
 
         try {
@@ -122,11 +120,11 @@ public class MemeDaoImpl implements MemeDao {
         } catch (IOException e) {
             // this branch should not be reached at all
 
-            return new ArrayList<>();
+            return new HashMap<>();
         }
     }
 
-    private StoredMemes convertToStoredMemes(List<Meme> memes) {
+    private StoredMemes convertToStoredMemes(Collection<Meme> memes) {
         final StoredMemes storedMemes = new StoredMemes();
 
         final List<StoredMeme> storedMemeList = new ArrayList<>();
@@ -152,15 +150,15 @@ public class MemeDaoImpl implements MemeDao {
         return storedMemes;
     }
 
-    private List<Meme> convertFromStoredMemes(StoredMemes storedMemes) {
-        final List<Meme> result = new ArrayList<>();
+    private Map<String, Meme> convertFromStoredMemes(StoredMemes storedMemes) {
+        final Map<String, Meme> result = new HashMap<>();
 
         for (StoredMeme storedMeme : storedMemes.getMemes()) {
             final Meme meme = new Meme();
 
             meme.setUri(Uri.parse(storedMeme.getUri()));
 
-            final List<Tag> tags = new ArrayList<>(storedMeme.getTagIds().size());
+            final Set<Tag> tags = new HashSet<>(storedMeme.getTagIds().size());
 
             for (Integer id : storedMeme.getTagIds()) {
                 final Tag tag = tagDao.getTagById(id);
@@ -172,7 +170,7 @@ public class MemeDaoImpl implements MemeDao {
 
             meme.setTags(tags);
 
-            result.add(meme);
+            result.put(meme.getUri().toString(), meme);
         }
 
         return result;

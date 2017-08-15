@@ -23,7 +23,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.share.ShareActivity"
+        <activity
+            android:name=".ui.meme.MemeActivity"
+            android:windowSoftInputMode="adjustPan">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.main.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.share.ShareActivity"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -31,13 +39,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="image/*" />
-
             </intent-filter>
         </activity>
-        <activity android:name=".ui.meme.MemeActivity">
+        <activity
+            android:name=".ui.meme.ImmerseMemeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:parentActivityName=".ui.meme.MemeActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.MainActivity" />
+                android:value="net.daergoth.dankbank.ui.meme.MemeActivity" />
         </activity>
     </application>
 
