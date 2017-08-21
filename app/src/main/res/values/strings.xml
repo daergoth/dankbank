@@ -6,4 +6,6 @@
 
     <string name="action_settings">Settings</string>
 
+    <string name="meme_detail_transition">MemeDetailTransition</string>
+
 </resources>

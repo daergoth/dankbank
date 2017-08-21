@@ -69,18 +69,18 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/saveMemeFloatingActionButton"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginBottom="0dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="8dp"
         android:clickable="true"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:elevation="5dp"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="@+id/listViewAddedTags"
+        app:elevation="6dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        app:pressedTranslationZ="6dp"
+        app:rippleColor="@color/colorAccentLight"
+        app:srcCompat="@drawable/ic_done_white_24dp" />
 
     <ListView
         android:id="@+id/listViewAddedTags"

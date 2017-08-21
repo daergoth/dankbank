@@ -26,7 +26,7 @@ public class MemeAdapter extends RecyclerView.Adapter<MemeAdapter.ViewHolder> {
     @Override
     public MemeAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.main_meme_list_row, parent, false);
+                .inflate(R.layout.main_meme_grid_item, parent, false);
 
 
         return new ViewHolder(v);

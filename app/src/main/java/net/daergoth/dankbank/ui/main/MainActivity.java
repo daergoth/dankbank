@@ -9,13 +9,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
@@ -100,15 +101,17 @@ public class MainActivity extends AppCompatActivity
 
 
         // RecyclerView setup
-        mainRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        mainRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+//        mainRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mainRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mainRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 //Open meme on bigger window
-                Intent bigMemeIntent = new Intent(MainActivity.this, MemeActivity.class);
-                bigMemeIntent.putExtra("memeUri", recyclerViewAdapter.getMemeList().get(position).getUri());
-                startActivity(bigMemeIntent);
+                ImageView memeView = ButterKnife.findById(view, R.id.meme_item_image);
+                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this, memeView, memeView.getTransitionName()).toBundle();
+                Intent memIntent = new Intent(MainActivity.this, MemeActivity.class);
+                memIntent.putExtra("memeUri", recyclerViewAdapter.getMemeList().get(position).getUri());
+                startActivity(memIntent, bundle);
             }
 
             @Override
