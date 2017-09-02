@@ -145,6 +145,9 @@ public class MemeActivity extends AppCompatActivity {
                         .setType(mimeType)
                         .startChooser();
                 break;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

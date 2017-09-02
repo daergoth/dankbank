@@ -4,10 +4,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -18,7 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -28,7 +26,6 @@ import android.widget.Toast;
 
 import net.daergoth.dankbank.DankBankApplication;
 import net.daergoth.dankbank.R;
-import net.daergoth.dankbank.meme.Meme;
 import net.daergoth.dankbank.meme.MemeDao;
 import net.daergoth.dankbank.tag.Tag;
 import net.daergoth.dankbank.tag.TagDao;
@@ -45,7 +42,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 124;
-    public static final String STATE_SELECTED_TAG_ID = "selectedTagId";
+    private static final String STATE_SELECTED_TAG_ID = "selectedTagId";
+
+    private static final String TAG = MainActivity.class.getCanonicalName();
 
     @Inject
     TagDao tagDao;
@@ -81,9 +80,12 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState != null && !savedInstanceState.isEmpty()) {
             selectedTagId = savedInstanceState.getInt(STATE_SELECTED_TAG_ID);
+            Log.d(TAG, "SavedInstanceState was loaded!");
         } else {
+            Log.d(TAG, "SavedInstanceState was empty or null!");
             selectedTagId = -1;
         }
+        Log.d(TAG, "Selected Tag ID: " + selectedTagId);
 
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity
         recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
         mainRecyclerView.setAdapter(recyclerViewAdapter);
 
+        /*
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
@@ -152,11 +155,14 @@ public class MainActivity extends AppCompatActivity
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(mainRecyclerView);
+        */
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        Log.d(TAG, "Selected Tag ID: " + selectedTagId);
 
         if (selectedTagId != -1) {
             Tag t = tagDao.getTagById(selectedTagId);
@@ -197,10 +203,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -209,6 +214,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         selectedTagId = item.getItemId();
+
+        Log.d(TAG, "NavItemSelected Selected Tag ID: " + selectedTagId);
 
         if (selectedTagId == -1) {
             recyclerViewAdapter = new MemeAdapter(memeDao.getAllMemes());
@@ -246,9 +253,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(STATE_SELECTED_TAG_ID, selectedTagId);
 
-        super.onSaveInstanceState(outState, outPersistentState);
+        Log.d(TAG, "Saved Tag ID: " + selectedTagId);
+
+        super.onSaveInstanceState(outState);
     }
 }
